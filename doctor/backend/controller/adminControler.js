@@ -289,7 +289,7 @@ export const countPatient = async(req,res) =>{
     res.status(200).json(specialtyData);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error fetching specialty data" });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -325,7 +325,8 @@ export const getmonthly = async (req, res) => {
 
     res.status(200).json(formattedData);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+      console.error(error);
+      res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -358,12 +359,79 @@ export const appointmentPerWeek = async (req, res) => {
 
     res.json(result);
   } catch (error) {
-    console.error('Error fetching appointments for current month:', error);
-    res.status(500).json({ message: 'Error fetching appointments' });
+    console.error(error);
+      res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+//delete doctor
+export const deleteDoctor = async (req, res) => {
+  try {
+    const { docId } = req.params;
+    const doctor = await Doctor.findByIdAndDelete(docId); // Corrected method
+
+    if (!doctor) {
+      return res.status(404).json({ error: 'Doctor not found' });
+    }
+
+    res.json({ success: true, message: 'Doctor deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// update doctor
+export const updateSingleDoctor = async (req, res) => {
+  try {
+            const { name, speciality, address, about, fees, experience ,degree, age } = req.body;
+            const { docId } = req.params;
+            const image = req.file; // Uploaded image
+    
+            const doctorExist = await Doctor.findById( docId );
+      
+            if (!doctorExist) {
+              return res.status(400).json({ success: false, message: 'Doctor not exist' });
+            }
+
+            // Validate required fields
+            if (!name || !age || !address || !about || !speciality || !degree || !fees || !experience ) {
+              return res.status(400).json({ success: false, message: "Data is missing" });
+            }
+        
+            const updateData = { name,  address, age ,about, experience, fees,degree,speciality };
+        
+            // Handle image upload if present
+            if (image) {
+              const imageUpload = await cloudinary.uploader.upload(image.path, { resource_type: "image" });
+              updateData.image = imageUpload.secure_url;
+            }
+        
+            // Update the user in one database call
+            const updatedDoctor = await Doctor.findByIdAndUpdate(docId, updateData, { new: true });
+          
+    
+    
+            return res.status(200).json({ success: true, message: "doctor Profile updated successfully",updatedDoctor });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
 
-
+//delete doctor
+export const getSingleDoctor = async (req, res) => {
+  try {
+    const { docId } = req.params;
+    const doctor = await Doctor.findById(docId)
+    res.status(200).json({ success: true,  doctor }); 
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
  
+// Dr. Warsame is a dedicated cardiologist with expertise in diagnosing and treating heart conditions. With four years of experience, he focuses on the prevention, detection, and management of heart diseases. He has extensive experience treating patients with heart conditions such as hypertension, heart failure, and arrhythmias. Dr. Warsame strives to provide personalized care, educating his patients on how to maintain a heart-healthy lifestyle. His commitment to improving his patients’ cardiovascular health has made him a trusted expert in the field of cardiology.

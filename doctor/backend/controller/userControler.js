@@ -12,8 +12,6 @@ import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 
-
-
 // register user
 export const userRegister = async (req, res) => {
   try {
@@ -52,7 +50,7 @@ export const userRegister = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-
+ 
 
 //login user
 export const login = async (req, res) => {
@@ -88,6 +86,7 @@ export const login = async (req, res) => {
 
 
 // booking appointment
+
 export const bookAppointment = async (req, res) => {
   try {
     const { docId, slotDate, slotTime } = req.body;
@@ -158,6 +157,199 @@ export const bookAppointment = async (req, res) => {
 };
 
 
+
+// rescheduling
+// export const rescheduleAppointment = async (req, res) => {
+//   try {
+//     const { appointmentId, slotDate, slotTime } = req.body;
+//     const { userId } = req.user;
+
+//      const appointExist = await Appointment.findById(appointmentId);
+
+//      if (appointExist) {
+//       return res.status(400).json({ success: false, message: "appointment is not available" });
+//      }
+     
+//      const doctorExist = await Appointment.findById(appoint.docData._id);
+
+//      if (doctorExist) {
+//       return res.status(400).json({ success: false, message: "doctor is not available" });
+//      }
+
+
+//      const userExist = await Appointment.findById(userId);
+
+//      if (userExist) {
+//       return res.status(400).json({ success: false, message: "doctor is not available" });
+//      }
+
+//      const formattedSlotDate = format(new Date(slotDate), "M/d/yyyy");
+    
+
+//      let date = docData.slotDate
+//      let time = docData.slotTime
+
+
+//      let slots_booked = docData.slots_booked || {};
+
+
+//      if (slots_booked[date]) {
+//        let index = slots_booked[date].indexOf(time) 
+
+//        if (index !== -1) {
+//         slots_booked[date].splice(index,1)
+//         if (slots_booked[date].length === 0) {
+//           delete slots_booked[date]
+//         }
+//         if (!slots_booked[formattedSlotDate]) {
+//           slots_booked[formattedSlotDate] = []
+//         }
+
+//         slots_booked[formattedSlotDate].push(slotTime)
+//         console.log('date changed successfully')
+//        } else {
+//         console.log('time is not founded')
+//        }
+//      } else {
+//         console.log('date is not founded')
+//      }
+
+//      await Doctor.findByIdAndUpdate(docId, { slots_booked });
+
+//      return res.status(200).json({ success: true, message: "Appointment booked successfully" });
+
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+
+
+// export const rescheduleAppointment = async (req, res) => {
+//   try {
+//     const { appointmentId, slotDate, slotTime } = req.body;
+//     const { userId } = req.user;
+
+//     // Check if the appointment exists
+//     const appointment = await Appointment.findById(appointmentId);
+//     if (!appointment) {
+//       return res.status(404).json({ success: false, message: "Appointment not found" });
+//     }
+
+//     // Fetch doctor details
+//     const doctor = await Doctor.findById(appointment.docData._id);
+//     if (!doctor) {
+//       return res.status(404).json({ success: false, message: "Doctor not found" });
+//     }
+
+//     // Check if user exists
+//     const user = await User.findById(userId);
+//     if (!user) {
+//       return res.status(404).json({ success: false, message: "User not found" });
+//     }
+
+//     const formattedSlotDate = format(new Date(slotDate), "M/d/yyyy");
+
+//     let { slotDate: currentSlotDate, slotTime: currentSlotTime } = appointment;
+//     let slots_booked = doctor.slots_booked || {};
+
+//     if (slots_booked[currentSlotDate]) {
+//       let index = slots_booked[currentSlotDate].indexOf(currentSlotTime);
+//       if (index !== -1) {
+//         slots_booked[currentSlotDate].splice(index, 1);
+//         if (slots_booked[currentSlotDate].length === 0) {
+//           delete slots_booked[currentSlotDate];
+//         }
+//       }
+//     }
+
+//     if (!slots_booked[formattedSlotDate]) {
+//       slots_booked[formattedSlotDate] = [];
+//     }
+
+//     slots_booked[formattedSlotDate].push(slotTime);
+
+//     // Update the appointment with new slot details
+//     appointment.slotDate = formattedSlotDate;
+//     appointment.slotTime = slotTime;
+//     await appointment.save();
+
+//     // Update doctor's booked slots
+//     await Doctor.findByIdAndUpdate(doctor._id, { slots_booked });
+
+//     return res.status(200).json({ success: true, message: "Appointment rescheduled successfully" });
+
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
+export const rescheduleAppointment = async (req, res) => {
+  try {
+    const { appointmentId, slotDate, slotTime } = req.body;
+    const { userId } = req.user;
+
+    // Check if the appointment exists
+    const appointment = await Appointment.findById(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({ success: false, message: "Appointment not found" });
+    }
+
+    // Fetch doctor details
+    const doctor = await Doctor.findById(appointment.docData._id);
+    if (!doctor) {
+      return res.status(404).json({ success: false, message: "Doctor not found" });
+    }
+
+    // Check if user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const formattedSlotDate = format(new Date(slotDate), "M/d/yyyy");
+
+    let { slotDate: currentSlotDate, slotTime: currentSlotTime } = appointment;
+    let slots_booked = doctor.slots_booked || {};
+
+    if (slots_booked[currentSlotDate]) {
+      let index = slots_booked[currentSlotDate].indexOf(currentSlotTime);
+      if (index !== -1) {
+        slots_booked[currentSlotDate].splice(index, 1);
+        if (slots_booked[currentSlotDate].length === 0) {
+          delete slots_booked[currentSlotDate];
+        }
+      }
+    }
+
+    if (!slots_booked[formattedSlotDate]) {
+      slots_booked[formattedSlotDate] = [];
+    }
+
+    slots_booked[formattedSlotDate].push(slotTime);
+
+    // Update the appointment with new slot details and doctor data
+    appointment.slotDate = formattedSlotDate;
+    appointment.slotTime = slotTime;
+    appointment.docData = doctor; // Ensure docData is updated with the latest doctor info
+
+    await appointment.save();
+
+    // Update doctor's booked slots
+    await Doctor.findByIdAndUpdate(doctor._id, { slots_booked });
+
+    return res.status(200).json({ success: true, message: "Appointment rescheduled successfully" });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
 //cancel appointment
 export const cancelAppointment = async (req, res) => {
   try {
@@ -202,7 +394,7 @@ export const cancelAppointment = async (req, res) => {
     res.status(200).json({ success: true, message: 'Appointment cancelled successfully' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'An error occurred while cancelling the appointment' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -282,8 +474,8 @@ export const cancelAppointment = async (req, res) => {
     await transporter.sendMail(mailOptions);
     res.status(200).json({ success: true, message: 'Reset email sent successfully' });
   } catch (error) {
-    console.error('Error in forgot-password:', error.message);
-    res.status(500).json({ success: false, message: 'Error sending email' });
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -316,43 +508,47 @@ export const cancelAppointment = async (req, res) => {
 
     res.status(200).json({ success: true, message: 'Password changed successfully' });
   } catch (error) {
-    console.error('Error in reset-password:', error.message);
-    res.status(500).json({ success: false, message: 'Error changing password' });
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// change password
-export const changePassword = async (req,res) => {
-  try {
-    const {userId}= req.user
-    const {oldPassword,ConfirmPassword,newPassword}= req.body
 
-    const userExist = await User.findById(userId)
+
+
+export const changePassword = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const { oldPassword, newPassword, ConfirmPassword } = req.body;
+
+    const userExist = await User.findById(userId);
 
     if (!userExist) {
-      return res.status(400).json({ success: false, message: 'user isnot exist' });
+      return res.status(400).json({ success: false, message: 'User does not exist' });
     }
-    
-     const match = await bcrypt.compare(oldPassword,userExist.password)
 
-     if (!match) {
-      return res.status(400).json({ success: false, message: 'password is incorrect' });
-     }
-     if (newPassword !== ConfirmPassword) {
-      return res.status(400).json({ success: false, message: 'please entir same password' });
-     }
+    const match = await bcrypt.compare(oldPassword, userExist.password);
 
-     const salt = await bcrypt.genSalt(10);
-     const hashedPassword = await bcrypt.hash(newPassword, salt);
+    if (!match) {
+      return res.status(400).json({ success: false, message: 'Old password is incorrect' });
+    }
 
-     userExist.password = hashedPassword;
-     await userExist.save()
-     return res.status(400).json({ success: true, message: 'password changed successfully' });
+    if (newPassword !== ConfirmPassword) {
+      return res.status(400).json({ success: false, message: 'Passwords do not match' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    userExist.password = hashedPassword;
+    await userExist.save();
+
+    return res.status(200).json({ success: true, message: 'Password changed successfully' });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
-}
+};
 
 //get user detail
 export const getUser = async (req,res) => {
@@ -360,38 +556,41 @@ export const getUser = async (req,res) => {
       const {userId}=req.user;
 
       const user=await User.findById(userId).select('-password')
-      res.send({success: true,user})
+      res.send({success: true,message:'user is getted successfully',user })
     } catch (error) {
-      
+      console.error(error);
+      res.status(500).json({ success: false, message: error.message });
     }
 }
 
+//user update
 export const updateUser = async (req, res) => {
   try {
-    const {userId} = req.user
-     const {name,address,dob,gender,phone}=req.body
-     const image=req.file;
+    const { userId } = req.user;
+    const { name, address, dob, gender, phone } = req.body;
+    const image = req.file; // Uploaded image
 
-     if(!name || !dob || !address || !gender || !phone){
-         res.status(500).json({ success: false, message: "data is missing" });
-     }
+    // Validate required fields
+    if (!name || !dob || !address || !gender || !phone) {
+      return res.status(400).json({ success: false, message: "Data is missing" });
+    }
 
-     await User.findByIdAndUpdate(userId,{name,dob,gender,address,phone})
+    let updateData = { name, dob, gender, address, phone };
 
-     if (image) {
-          // Upload image to Cloudinary
-          const imageUpload = await cloudinary.uploader.upload(image.path, { resource_type: 'image' });
-          const imageUrl = imageUpload.secure_url;
+    // Handle image upload if present
+    if (image) {
+      const imageUpload = await cloudinary.uploader.upload(image.path, { resource_type: "image" });
+      updateData.image = imageUpload.secure_url;
+    }
 
-          await User.findByIdAndUpdate(userId,{image:imageUrl})
-     }
+    // Update the user in one database call
+    await User.findByIdAndUpdate(userId, updateData, { new: true });
 
-
-     res.status(500).json({ success: true, message: "profile is updated" });
+    return res.status(200).json({ success: true, message: "Profile updated successfully" });
 
   } catch (error) {
-    console.error("Error updating user:", error); // Log any errors
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Error updating user:", error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 

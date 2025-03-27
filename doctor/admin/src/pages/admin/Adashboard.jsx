@@ -86,7 +86,7 @@ const Adashboard = () => {
     }
   }, [atoken]);
 
-  const countEarning = async () => {
+ const countEarning = async () => {
     try {
       const { data } = await axios.get(
         "http://localhost:4300/admin/api/count-amount",
