@@ -2,7 +2,7 @@ import Doctor from "../modals/doctorSchema.js"
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import Appointment from "../modals/appointmentSchema.js";
-import {v2 as cloudinary} from 'cloudinary'
+import {v2 as cloudinary} from 'cloudinary';
 
   //doctor login
 export const login = async (req, res) => {

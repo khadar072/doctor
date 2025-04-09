@@ -14,6 +14,7 @@ const appointmentSchema = new mongoose.Schema({
    cancelled:{type:Boolean,default:false},
    isCompletted:{type:Boolean,default:false},
    payment:{type:Boolean,default:false},
+   rescheduled:{type:Boolean,default:false},
 },{minimize:false});
 
 const Appointment = mongoose.model('Appointment', appointmentSchema);

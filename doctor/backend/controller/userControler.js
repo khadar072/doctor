@@ -333,12 +333,13 @@ export const rescheduleAppointment = async (req, res) => {
     // Update the appointment with new slot details and doctor data
     appointment.slotDate = formattedSlotDate;
     appointment.slotTime = slotTime;
-    appointment.docData = doctor; // Ensure docData is updated with the latest doctor info
+    appointment.docData = doctor // Ensure docData is updated with the latest doctor info
+    appointment.rescheduled = true
 
     await appointment.save();
 
     // Update doctor's booked slots
-    await Doctor.findByIdAndUpdate(doctor._id, { slots_booked });
+    await Doctor.findByIdAndUpdate(doctor._id, { slots_booked } );
 
     return res.status(200).json({ success: true, message: "Appointment rescheduled successfully" });
 
